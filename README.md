@@ -10,7 +10,7 @@ Original work: https://github.com/mspandit/sequitur-python
 
 Download package, extract it to your working directory and change extracted directory name to: sequiturpython. Then you should be good to go.
 
-<code>
+<pre><code>
 from sequiturpython.grammar import Grammar
 
 g = Grammar()
@@ -18,17 +18,17 @@ g.train_string('abcdbcabcd')
 print (g.get_grammar())
 print ()
 print (g.print_grammar())
-</code>
+</code></pre>
 
 output:
 
-<code>
+<pre><code>
 [[1, 2, 1], ['a', 2, 'd'], ['b', 'c']]
 
 0 --(0)--> 1 2 1 
 1 --(2)--> a 2 d                                         abcd
 2 --(2)--> b c                                           bc
-</code>
+</code></pre>
 
 ## CHANGED 27.2.2016:
 
