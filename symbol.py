@@ -1,5 +1,6 @@
 class Symbol(object):
     """docstring for Symbol"""
+
     def __init__(self, grammar):
         """docstring for __init__"""
         self.grammar = grammar
@@ -8,7 +9,7 @@ class Symbol(object):
 
     def print_terminal(self):
         """docstring for print_terminal"""
-        if (' ' == self.value()):
+        if ' ' == self.value():
             return '_'
         else:
             return self.value()
@@ -23,21 +24,26 @@ class Symbol(object):
         output_array.append("%s " % self.print_terminal())
         return line_length + len("%s " % self.print_terminal())
 
+    def get_rule(self, _):
+        """docstring for print_rule"""
+        return self.print_terminal()
+
     @staticmethod
     def factory(grammar, value):
         """docstring for factory"""
-        from rule import Rule
-        if (str == type(value)):
+        from .rule import Rule
+
+        if isinstance(value, str):
             return Terminal(grammar, value)
-        elif (Terminal == type(value)):
+        elif isinstance(value, Terminal):
             return Terminal(grammar, value.terminal)
-        elif (NonTerminal == type(value)):
+        elif isinstance(value, NonTerminal):
             return NonTerminal(grammar, value.rule)
-        elif (Rule == type(value)):
+        elif isinstance(value, Rule):
             return NonTerminal(grammar, value)
         else:
             raise "type(value) == %s" % type(value)
-    
+
     @staticmethod
     def guard(grammar, value):
         """docstring for guard"""
@@ -47,7 +53,7 @@ class Symbol(object):
         """
         Links two symbols together, removing any old digram from the hash table.
         """
-        if (self.next):
+        if self.next:
             self.delete_digram()
             
             """
@@ -70,7 +76,7 @@ class Symbol(object):
 
     def delete_digram(self):
         """Removes the digram from the hash table"""
-        if (self.is_guard() or self.next.is_guard()):
+        if self.is_guard() or self.next.is_guard():
             pass
         else:
             self.grammar.clear_index(self)
@@ -130,9 +136,9 @@ class Symbol(object):
 
     def process_match(self, match):
         """Deal with a matching digram"""
-        from rule import Rule
+        from .rule import Rule
         rule = None
-        if (match.prev.is_guard() and match.next.next.is_guard()):
+        if match.prev.is_guard() and match.next.next.is_guard():
             # reuse an existing rule
             rule = match.prev.rule
             self.substitute(rule)
@@ -148,19 +154,18 @@ class Symbol(object):
             match.prev.propagate_change()
             self.substitute(rule)
             self.prev.propagate_change()
-
         # Check for an under-used rule
-        if (NonTerminal == type(rule.first()) and (rule.first().rule.reference_count == 1)):
+        if NonTerminal == type(rule.first()) and rule.first().rule.reference_count == 1:
             rule.first().expand()
-    
+
     def value(self):
         """docstring for value"""
-        return (self.rule.unique_number if self.rule else self.terminal)
+        return self.rule.unique_number if self.rule else self.terminal
 
     def string_value(self):
         """docstring for string_value"""
         if self.rule:
-            return "rule: %d" % self.rule.unique_number
+            return "rule(%d)" % self.rule.unique_number
         else:
             return self.terminal
 
@@ -168,9 +173,9 @@ class Symbol(object):
         """docstring for hash_value"""
         return "%s+%s" % (self.string_value(), self.next.string_value())
 
-
 class Terminal(Symbol):
     """docstring for Terminal"""
+
     def __init__(self, grammar, terminal):
         super(Terminal, self).__init__(grammar)
         self.terminal = terminal
@@ -188,9 +193,9 @@ class Terminal(Symbol):
         self.prev.join(self.next)
         self.delete_digram()
 
-
 class NonTerminal(Symbol):
     """docstring for NonTerminal"""
+
     def __init__(self, grammar, rule):
         super(NonTerminal, self).__init__(grammar)
         self.rule = rule
@@ -202,17 +207,26 @@ class NonTerminal(Symbol):
 
     def string_value(self):
         """docstring for string_value"""
-        return "rule: %d" % self.rule.unique_number
+        return "rule(%d)" % self.rule.unique_number
 
     def print_rule(self, rule_set, output_array, line_length):
         """docstring for print_rule"""
-        if (self.rule in rule_set):
+        if self.rule in rule_set:
             rule_index = rule_set.index(self.rule)
         else:
             rule_index = len(rule_set)
             rule_set.append(self.rule)
         output_array.append("%d " % rule_index)
         return line_length + len("%d " % rule_index)
+
+    def get_rule(self, rule_set):
+        """docstring for get_rule"""
+        if self.rule in rule_set:
+            rule_index = rule_set.index(self.rule)
+        else:
+            rule_index = len(rule_set)
+            rule_set.append(self.rule)
+        return rule_index
 
     def print_rule_expansion(self, rule_set, output_array, line_length):
         """docstring for print_rule_expansion"""
@@ -247,7 +261,7 @@ class Guard(Symbol):
 
     def string_value(self):
         """docstring for string_value"""
-        return "rule: %d" % self.rule.unique_number
+        return "rule(%d)" % self.rule.unique_number
 
     def delete(self):
         """
